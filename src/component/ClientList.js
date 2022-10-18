@@ -1,7 +1,32 @@
-import React, { useState, useRef } from "react";
-import { useDispatch } from "react-redux";
-import TableList from "./TableLIst";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import Table from "./TableLIst";
+import Loading from "./Loading";
 import Tooltip from "./Tooltip";
+import Notification from "./Notificathion";
+import CreateUserModal from "./CreateUserModal";
+import { fetchData } from "../app/actions/getActions";
+import { deleteData } from "../app/actions/deleteActions";
+import {
+  selectUserState,
+  selectisDataLoading,
+  selectisDataSuccess,
+} from "../app/features/clientDataSlice";
+import {
+  selectisDeleteClientList,
+  selectIsDeleteLoading,
+  selectisDeleteSuccess,
+} from "../app/features/deleteDataSlice";
+import {
+  selectIsCreateClientList,
+  selectIsCreateLoading,
+  selectIsCretaeSuccess,
+} from "../app/features/createDataSLice";
+import {
+  selectisEditclientsList,
+  selectisEditLoading,
+  selectisEditSuccess,
+} from "../app/features/editDataSlice";
 
 const curState = {
   id: null,
@@ -15,27 +40,69 @@ const ClientList = () => {
 
   const dispatch = useDispatch();
 
-  //   function usePrevious(value) {
-  //     const ref = useRef();
-  //     useEffect(() => {
-  //       ref.current = value;
-  //     }, [value]);
-  //     return ref.current;
-  //   }
-  //   const prevLoading = usePrevious(loading);
+  const list = useSelector(selectUserState);
+  const isGetLoading = useSelector(selectisDataLoading);
+  const isGetSuccess = useSelector(selectisDataSuccess);
 
-  //   useEffect(() => {
-  //     // if (prevLoading) {
-  //     dispatch({ type: sagaActions.FETCH_DATA });
-  //     // }
-  //   }, [dispatch]);
+  const IsDeletetedLoading = useSelector(selectIsDeleteLoading);
+  const IsDeletetedSuccess = useSelector(selectisDeleteSuccess);
 
-  //   const handleCLick = (control) => {
-  //     dispatch({
-  //       type: sagaActions.DELETE_USER_REQUESTED,
-  //       control: control.id,
-  //     });
-  //   };
+  const isCreateLoading = useSelector(selectIsCreateLoading);
+  const IsCreateSuccess = useSelector(selectIsCretaeSuccess);
+
+  const isEditLoading = useSelector(selectisEditLoading);
+  const IsEditSuccess = useSelector(selectisEditSuccess);
+
+  const editList = useSelector(selectisEditclientsList);
+  const deleteList = useSelector(selectisDeleteClientList);
+  const createList = useSelector(selectIsCreateClientList);
+
+  console.log({ list, editList, deleteList, createList });
+
+  function usePrevious(value) {
+    const ref = useRef();
+    useEffect(() => {
+      ref.current = value;
+    }, [value]);
+    return ref.current;
+  }
+
+  const prevIsDeletetedLoading = usePrevious(IsDeletetedLoading);
+  const prevIsCreateLoading = usePrevious(isCreateLoading);
+  const prevIsEditLoading = usePrevious(isEditLoading);
+
+  useEffect(() => {
+    if (
+      (!isGetLoading && !isGetSuccess) ||
+      (prevIsDeletetedLoading && IsDeletetedSuccess) ||
+      (prevIsCreateLoading && IsCreateSuccess) ||
+      (prevIsEditLoading && IsEditSuccess)
+    ) {
+      dispatch(fetchData());
+    }
+  }, [
+    IsCreateSuccess,
+    IsDeletetedSuccess,
+    IsEditSuccess,
+    dispatch,
+    isGetLoading,
+    isGetSuccess,
+    prevIsCreateLoading,
+    prevIsDeletetedLoading,
+    prevIsEditLoading,
+  ]);
+
+  const filteredList = useMemo(() => {
+    return list
+      ? list.filter((item) => {
+          return item.id !== control.id;
+        })
+      : [];
+  }, [control.id, list]);
+
+  const handleCLick = (control) => {
+    dispatch(deleteData({ data: filteredList, id: control.id }));
+  };
 
   const columns = [
     {
@@ -89,13 +156,21 @@ const ClientList = () => {
 
   return (
     <>
-      {/* <TableList data={""} columns={columns} /> */}
-      {/* <Tooltip
+      {isGetSuccess && !isGetLoading ? (
+        <Table data={list} columns={columns} />
+      ) : !isGetSuccess && isGetLoading ? (
+        <Loading />
+      ) : (
+        <Notification />
+      )}
+
+      <Tooltip
         setShow={setShow}
         show={show}
-        // deleteRow={handleCLick}
+        deleteRow={handleCLick}
         rowProps={control}
-      /> */}
+      />
+
       <button
         className=" my-12 focus:outline-none focus:ring-2 focus:ring-offset-2 m y
    focus:ring-indigo-600 mx-auto transition duration-150 ease-in-out
@@ -107,12 +182,13 @@ const ClientList = () => {
       >
         Create User
       </button>
-      {/* 
-      <CreateCLientModal
+
+      <CreateUserModal
+        data={list}
         control={control}
         showForm={showForm}
         setShowForm={setShowForm}
-      />  */}
+      />
     </>
   );
 };

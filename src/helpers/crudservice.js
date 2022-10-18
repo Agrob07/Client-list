@@ -16,6 +16,7 @@ const putItems = async (url, data) => {
 
 const deleteItems = async (url) => {
   const res = await axios.delete(url);
+
   return res;
 };
 

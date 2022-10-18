@@ -1,58 +1,46 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React from "react";
 import { useTable } from "react-table";
-import update from "immutability-helper";
-import TableCard from "./TableCard";
 
-function TableList({ data, columns }) {
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    useTable({
-      columns,
-      data,
-    });
-  const [cards, setCards] = useState(rows);
-  useEffect(() => {
-    setCards(rows);
-  }, [data, rows]);
+function Table({ columns, data }) {
+  const { getTableProps, headerGroups, rows, prepareRow } = useTable({
+    columns,
+    data,
+  });
 
-  const moveCard = useCallback((dragIndex, hoverIndex) => {
-    setCards((prevCards) =>
-      update(prevCards, {
-        $splice: [
-          [dragIndex, 1],
-          [hoverIndex, 0, prevCards[dragIndex]],
-        ],
-      })
-    );
-  }, []);
+  const firstPageRows = rows.slice(0, 20);
 
   return (
-    <table {...getTableProps()} className=" bg-white-500 w-full">
-      <thead className="w-full">
-        {headerGroups.map((headerGroup) => (
-          <tr {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map((column) => (
-              <th className="" {...column.getHeaderProps()}>
-                {column.render("Header")}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody {...getTableBodyProps()} className="w-full">
-        {cards.map((card, idx) => {
-          prepareRow(card);
-          return (
-            <TableCard
-              key={card.id}
-              id={card.id}
-              index={idx}
-              row={card}
-              moveCard={moveCard}
-            />
-          );
-        })}
-      </tbody>
-    </table>
+    <>
+      <table {...getTableProps()} className=" bg-white-500 w-full">
+        <thead className="w-full">
+          {headerGroups.map((headerGroup) => (
+            <tr {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map((column) => (
+                <th className="" {...column.getHeaderProps()}>
+                  {column.render("Header")}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {firstPageRows.map((row, i) => {
+            prepareRow(row);
+            return (
+              <tr {...row.getRowProps()}>
+                {row.cells.map((cell) => {
+                  return (
+                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <br />
+    </>
   );
 }
-export default TableList;
+
+export default Table;

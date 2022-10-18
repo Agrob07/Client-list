@@ -1,10 +1,10 @@
 import React, { useState } from "react";
+
 const Notification = () => {
   const [flag, setFlag] = useState(false);
   return (
     <div>
       <div className="mx-auto flex justify-center sm:justify-end pt-16 sm:pt-6 pb-6 sm:pb-16 relative h-64 overflow-x-hidden">
-        {/*code for notification starts*/}
         <div
           role="alert"
           className="sm:mr-6 mt-16 sm:mt-6 mb-6 sm:mb-0 xl:w-3/12 mx-auto absolute left-0 sm:left-auto right-0 sm:top-0 sm:w-1/2 w-10/12 bg-white dark:bg-gray-800 shadow-lg rounded flex pr-4 py-4 transition duration-150 ease-in-out"
@@ -52,7 +52,6 @@ const Notification = () => {
             </div>
           </div>
         </div>
-        {/*code for notification ends*/}
       </div>
       <style>
         {`
